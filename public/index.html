@@ -14,15 +14,85 @@
   <title>Crud JS</title>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
+      navigator.serviceWorker.register('sw.js')
         .then(reg => console.log('Service Worker registrado', reg))
         .catch(err => console.error('Error al registrar el Service Worker', err));
     }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      let deferredPrompt;
+      const installBtn = document.getElementById('installBtn');
+      const modalElement= document.getElementById('installModal');
+      const confirmInstallBtn = document.getElementById('confirmInstallBtn');
+
+      window.addEventListener('beforeinstallprompt', (e) =>{
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'block';
+      });
+
+      installBtn.addEventListener('click', () => {
+        const modal = new bootstrap.Modal(document.getElementById('installModal'));
+        modal.show();
+      })
+
+      confirmInstallBtn.addEventListener('click', async () => {
+        if(deferredPrompt){
+          const modal = bootstrap.Modal.getInstance(document.getElementById('installModal'));
+          if(modal.isVisible()){
+            modal.hide();
+          }
+          
+          await deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log(`User response to the install prompt : ${outcome}`);
+          deferredPrompt = null;
+          modalElement.removeEventListener('click', handleModalClick);
+          modalElement.innerHTML= '';
+        }
+      });
+
+      document.getElementById('confirmInstallBtn').addEventListener('click', async()=>{
+        const modal = bootstrap.Modal.getInstance(document.getElementById('installModal'));
+        modal.hide();
+        if(deferredPrompt){
+          deferredPrompt.prompt();
+          const {outcome} = await deferredPrompt.userChoice;
+          console.log(`User response to the install prompt: ${outcome}`);
+          deferredPrompt = null;
+        }
+      });
+
+    });
+
   </script>
+
 </head>
+
+
 <body class="container">
   <br/>
-
+  <button id="installBtn" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#installModal" style="display: none;">
+    Instalar aplicacion
+  </button>
+  <div class="modal fade" id="installModal" tabindex="-1" aria-labelledby="installModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="installModalLabel">Instalar Aplicacion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> </button>
+        </div>
+        <div class="modal-body">
+          ¿Quieres instalar esta aplicacion en tu dispositivo?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="confirmInstallBtn">Instalar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br>
   <!-- Formulario con Bootstrap -->
   <form onsubmit="event.preventDefault();onSubmit();" autocomplete="off" class="mb-4">
     <div class="mb-3">

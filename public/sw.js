@@ -8,7 +8,9 @@ self.addEventListener('install', (event) => {
                 './styles/style.css',
                 './js/crud.js',
                 './icon192_rounded.png',
-                './icon512_rounded.png'
+                './icon512_rounded.png',
+                './icon192_maskable.png',
+                './icon512_maskable.png'
             ]);
         })
     );
